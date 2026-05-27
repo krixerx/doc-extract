@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Node / frontend
+node_modules/
+dist/
+.vite/
+*.log
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+
+# IDE / OS
+.project
+.settings/
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Local sample documents (do not commit user data)
+doc-extract-api/samples/*
+!doc-extract-api/samples/.gitkeep
+
+# Model cache (if mounted)
+.cache/
+huggingface/

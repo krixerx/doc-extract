@@ -1,0 +1,12 @@
+[tool.ruff]
+line-length = 110
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+markers = [
+    "slow: tests that load the OCR model (10-30s, downloads ~1.5GB on first run)",
+]
