@@ -11,6 +11,19 @@ Comes with a minimal web UI for drag-and-drop uploads.
 **Status:** Early development. See [`docs/DESIGN.md`](docs/DESIGN.md) for the full
 design and roadmap.
 
+## Screenshots
+
+Drop an image and wait while the model runs (indeterminate spinner + an
+elapsed-time counter — see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for why
+there's no progress bar):
+
+![Processing state — file uploaded, OCR running, 0:15 elapsed](docs/screenshots/processing.png)
+
+When inference completes, you get the extracted text plus the model name and
+wall-clock duration:
+
+![Result state — 16.2s, GOT-OCR2_0, extracted certificate text with copy button](docs/screenshots/result.png)
+
 ## Quick start
 
 ```bash
@@ -56,7 +69,8 @@ doc-extract/
 ├── doc-extract-web/    # React + Vite + nginx
 ├── docs/
 │   ├── ARCHITECTURE.md # why it's built this way
-│   └── DESIGN.md       # full design doc with alternatives
+│   ├── DESIGN.md       # full design doc with alternatives
+│   └── screenshots/    # UI screenshots used in this README
 ├── docker-compose.yml
 ├── README.md           # you are here
 ├── CLAUDE.md           # context for AI coding agents
