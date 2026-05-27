@@ -14,7 +14,24 @@ from dataclasses import dataclass
 from typing import Optional
 
 import torch
-from transformers import AutoModel, AutoTokenizer
+
+# GOT-OCR 2.0's bundled modeling_GOT.py hardcodes calls to `.cuda()` and `.half()`
+# inside chat() — e.g. `torch.as_tensor(input_ids).cuda()` and an `image.half()`
+# cast before the vision tower. On CPU-only deployments those raise:
+#   - AssertionError: Torch not compiled with CUDA enabled
+#   - RuntimeError: Input type (c10::Half) and bias type (float) should be the same
+# We neuter both methods before transformers is imported so the model's chat()
+# picks up the no-op versions. Tensors stay on CPU in fp32 (matches our
+# `torch_dtype=torch.float32` load) — the model produces identical text output.
+# CPU fp16 is poorly supported in PyTorch anyway, so disabling .half() is the
+# right move here.
+if not torch.cuda.is_available():
+    torch.Tensor.cuda = lambda self, *args, **kwargs: self  # type: ignore[assignment]
+    torch.Tensor.half = lambda self, *args, **kwargs: self  # type: ignore[assignment]
+    torch.nn.Module.cuda = lambda self, *args, **kwargs: self  # type: ignore[assignment]
+    torch.nn.Module.half = lambda self, *args, **kwargs: self  # type: ignore[assignment]
+
+from transformers import AutoModel, AutoTokenizer  # noqa: E402 — must follow the cuda shim above
 
 logger = logging.getLogger(__name__)
 

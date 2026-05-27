@@ -120,6 +120,17 @@ cd doc-extract-api && pytest
   just moves the slowness to the first request.
 - **`trust_remote_code=True` is required** for GOT-OCR; the model ships custom
   modeling code. This is expected, not a security smell for this specific model.
+- **GOT-OCR's bundled `modeling_GOT.py` hardcodes `.cuda()` and `.half()`** in
+  its `chat()` method. On CPU-only deployments those raise:
+  - `AssertionError: Torch not compiled with CUDA enabled`, and
+  - `RuntimeError: Input type (c10::Half) and bias type (float) should be the same`
+  (the input is cast to fp16 but the model weights stay fp32 because of
+  `torch_dtype=torch.float32`).
+  `app/ocr.py` patches `torch.Tensor.cuda`, `torch.Tensor.half`,
+  `torch.nn.Module.cuda`, and `torch.nn.Module.half` to no-ops at module load
+  time *before* `transformers` is imported. **Do not remove the shim** —
+  removing it breaks CPU inference. The shim is already guarded by
+  `if not torch.cuda.is_available()`, so GPU paths are untouched.
 - **`libgl1` and `libglib2.0-0`** are required apt packages for image processing
   on `python:3.11-slim`. Missing these = cryptic import errors at runtime.
 - **`client_max_body_size` in nginx defaults to 1 MB**. Set it to ≥25 MB so large
