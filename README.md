@@ -83,6 +83,21 @@ doc-extract/
 - [CONTRIBUTING.md](CONTRIBUTING.md) — local dev workflow and conventions.
 - [docs/DESIGN.md](docs/DESIGN.md) — full design document with alternatives considered.
 
-## License
+## Licensing
 
-TBD — likely Apache 2.0 (matches the GOT-OCR 2.0 model license).
+doc-extract is released under the **Apache License 2.0** — see
+[`LICENSE`](LICENSE) for the full text.
+
+The project depends on third-party software whose licenses are listed in
+[`NOTICE.md`](NOTICE.md). Highlights worth knowing up front:
+
+- **GOT-OCR 2.0** (the OCR model) is licensed under Apache 2.0 by `stepfun-ai`.
+  Commercial use is allowed. The model is loaded from HuggingFace at build time
+  and baked into the API container image.
+- **verovio** is LGPL-3.0. It's a transitive dependency of GOT-OCR for the
+  `ocr_type='format'` path, which doc-extract does not use. The unmodified
+  upstream wheel ships dynamically — doc-extract's own code is unaffected.
+- All other runtime dependencies (PyTorch, Transformers, FastAPI, React, etc.)
+  are under permissive licenses (Apache 2.0, MIT, BSD).
+
+See [`NOTICE.md`](NOTICE.md) for the full attribution list and audit commands.
