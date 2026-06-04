@@ -19,7 +19,10 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name
 logger = logging.getLogger(__name__)
 
 MAX_UPLOAD_BYTES = 25 * 1024 * 1024  # 25 MB
-ALLOWED_CONTENT_TYPES = {"image/png", "image/jpeg", "image/jpg", "image/webp", "image/tiff"}
+MAX_PDF_PAGES = 10  # GOT-OCR is ~1-3 min/page on CPU — cap keeps requests within nginx timeout
+IMAGE_CONTENT_TYPES = {"image/png", "image/jpeg", "image/jpg", "image/webp", "image/tiff"}
+PDF_CONTENT_TYPES = {"application/pdf"}
+ALLOWED_CONTENT_TYPES = IMAGE_CONTENT_TYPES | PDF_CONTENT_TYPES
 
 
 @asynccontextmanager
@@ -78,8 +81,20 @@ async def post_ocr(file: UploadFile = File(...)) -> OcrResponse:
             detail={"error": f"File exceeds {MAX_UPLOAD_BYTES} bytes", "code": "file_too_large"},
         )
 
+    is_pdf = file.content_type in PDF_CONTENT_TYPES or data[:4] == b"%PDF"
     try:
-        text, duration_ms = ocr.run_ocr(data)
+        if is_pdf:
+            pages, duration_ms = ocr.run_ocr_pdf(data, max_pages=MAX_PDF_PAGES)
+        else:
+            pages, duration_ms = ocr.run_ocr_image(data)
+    except ocr.PdfTooManyPagesError as exc:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "error": f"PDF has {exc.page_count} pages; max is {exc.max_pages}",
+                "code": "pdf_too_many_pages",
+            },
+        ) from exc
     except Exception as exc:  # noqa: BLE001 — surface as 500 with code
         logger.exception("OCR inference failed")
         raise HTTPException(
@@ -87,4 +102,10 @@ async def post_ocr(file: UploadFile = File(...)) -> OcrResponse:
             detail={"error": str(exc), "code": "inference_failure"},
         ) from exc
 
-    return OcrResponse(text=text, duration_ms=duration_ms, model=ocr.MODEL_ID)
+    return OcrResponse(
+        text="\n\n".join(pages),
+        pages=pages,
+        page_count=len(pages),
+        duration_ms=duration_ms,
+        model=ocr.MODEL_ID,
+    )

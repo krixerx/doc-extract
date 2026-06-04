@@ -1,5 +1,7 @@
 export interface OcrResult {
   text: string;
+  pages: string[];
+  page_count: number;
   duration_ms: number;
   model: string;
 }

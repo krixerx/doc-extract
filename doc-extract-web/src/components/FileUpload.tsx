@@ -5,10 +5,16 @@ interface Props {
   accept?: string;
 }
 
-const ALLOWED = ["image/png", "image/jpeg", "image/webp", "image/tiff"];
+const ALLOWED = [
+  "image/png",
+  "image/jpeg",
+  "image/webp",
+  "image/tiff",
+  "application/pdf",
+];
 const MAX_BYTES = 25 * 1024 * 1024;
 
-export function FileUpload({ onFile, accept = "image/*" }: Props) {
+export function FileUpload({ onFile, accept = "image/*,application/pdf" }: Props) {
   const [dragging, setDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -53,9 +59,11 @@ export function FileUpload({ onFile, accept = "image/*" }: Props) {
       <div className="dropzone__icon" aria-hidden>
         📄
       </div>
-      <div className="dropzone__primary">Drop image here</div>
+      <div className="dropzone__primary">Drop image or PDF here</div>
       <div className="dropzone__hint">or click to browse</div>
-      <div className="dropzone__formats">Supports: PNG, JPG, WEBP, TIFF · up to 25 MB</div>
+      <div className="dropzone__formats">
+        Supports: PNG, JPG, WEBP, TIFF, PDF · up to 25 MB · PDF max 10 pages
+      </div>
 
       <input
         ref={inputRef}

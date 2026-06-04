@@ -23,6 +23,7 @@ export function ResultView({ result }: Props) {
       <div className="result__header">
         <div className="result__meta">
           <span className="result__ok">✓ Done</span> in {(result.duration_ms / 1000).toFixed(1)}s ·{" "}
+          {result.page_count > 1 ? `${result.page_count} pages · ` : ""}
           {result.model}
         </div>
         <button className="result__copy" onClick={handleCopy} type="button">

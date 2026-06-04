@@ -16,10 +16,12 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 
 # System deps for PyTorch + image processing (libgl, libglib are required for
-# Pillow/OpenCV runtime — missing these = cryptic ImportError on first request)
+# Pillow/OpenCV runtime — missing these = cryptic ImportError on first request).
+# poppler-utils provides pdftoppm/pdfinfo, required by pdf2image for PDF input.
 RUN apt-get update && apt-get install -y --no-install-recommends \
         libgl1 \
         libglib2.0-0 \
+        poppler-utils \
     && rm -rf /var/lib/apt/lists/*
 
 # PyTorch CPU wheels first (much smaller than the default CUDA-bundled wheels)
